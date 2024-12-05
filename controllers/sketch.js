@@ -2,51 +2,76 @@ const multer = require('multer');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const FormData = require('form-data');
 
 // Multer setup for file uploads
 const upload = multer({ dest: 'public/uploads/' });
 
-exports.upload = upload.single('sketch');
+exports.upload = upload.single('image');
 
-exports.processSketch = async (req, res) => {
+
+exports.processSketch =  async (req, res) => {
+    const imagePath = req.file.path;
+    
     try {
+        const formData = new FormData();
+        formData.append('image', fs.createReadStream(imagePath));
 
-        // Convert uploaded image to base64
-        const filePath = path.join(__dirname, '../', req.file.path);
-        const imageData = fs.readFileSync(filePath).toString('base64');
-
-        // Call OpenAI API with a prompt describing the image data
-        const openaiResponse = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
-            {
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are an assistant that describes sketches based on image data.'
-                    },
-                    {
-                        role: 'user',
-                        content: `Here is an image encoded in base64: ${imageData}. Describe what the sketch might depict.`
-                    }
-                ],
-                max_tokens: 200,
-                temperature: 0.7,
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json',
-                }
+        const response = await axios.post('http://127.0.0.1:5001/caption', formData, {
+            headers: {
+                'Content-Type': `multipart/form-data`
             }
-        );
+        });
 
-        const description = openaiResponse.data.choices[0].message.content;
-
-        // Render result page with the sketch description
-        res.render('result', { description, imagePath: req.file.filename });
+        const caption = response.data.caption;
+        fs.unlinkSync(imagePath); // Clean up the uploaded file
+        res.render('result', { caption });
     } catch (error) {
-        console.error(error.response?.data || error.message);
-        res.status(500).send('Error processing sketch.');
+        console.error(error);
+        res.status(500).send('Error generating caption');
     }
 };
+
+
+// exports.processSketch = async (req, res) => {
+//     try {
+
+//         // Convert uploaded image to base64
+//         const filePath = path.join(__dirname, '../', req.file.path);
+//         const imageData = fs.readFileSync(filePath).toString('base64');
+
+//         // Call OpenAI API with a prompt describing the image data
+//         const openaiResponse = await axios.post(
+//             'https://api.openai.com/v1/chat/completions',
+//             {
+//                 model: 'gpt-3.5-turbo',
+//                 messages: [
+//                     {
+//                         role: 'system',
+//                         content: 'You are an assistant that describes sketches based on image data.'
+//                     },
+//                     {
+//                         role: 'user',
+//                         content: `Here is an image encoded in base64: ${imageData}. Describe what the sketch might depict.`
+//                     }
+//                 ],
+//                 max_tokens: 200,
+//                 temperature: 0.7,
+//             },
+//             {
+//                 headers: {
+//                     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+//                     'Content-Type': 'application/json',
+//                 }
+//             }
+//         );
+
+//         const description = openaiResponse.data.choices[0].message.content;
+
+//         // Render result page with the sketch description
+//         res.render('result', { description, imagePath: req.file.filename });
+//     } catch (error) {
+//         console.error(error.response?.data || error.message);
+//         res.status(500).send('Error processing sketch.');
+//     }
+// };

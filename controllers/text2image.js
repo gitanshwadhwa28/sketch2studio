@@ -10,25 +10,67 @@ const upload = multer({ dest: 'public/uploads/' });
 exports.upload = upload.single('image');
 
 
-exports.processSketch =  async (req, res) => {
-    const imagePath = req.file.path;
+// exports.processSketch =  async (req, res) => {
+//     const imagePath = req.file.path;
     
+//     try {
+//         const formData = new FormData();
+//         formData.append('image', fs.createReadStream(imagePath));
+
+//         const response = await axios.post('http://0.0.0.0:5000/', formData, {
+//             headers: {
+//                 'Content-Type': `multipart/form-data`
+//             }
+//         });
+
+//         const caption = response.data.caption;
+//         fs.unlinkSync(imagePath); // Clean up the uploaded file
+//         res.render('result', { caption });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Error generating caption');
+//     }
+// };
+
+
+exports.processSketch = async (req, res) => {
+    const prompt = req.body.prompt; // Assuming the prompt is sent in the request body
+    
+    if (!prompt) {
+        return res.status(400).send('Prompt is required');
+    }
+
     try {
-        const formData = new FormData();
-        formData.append('image', fs.createReadStream(imagePath));
-
-        const response = await axios.post('http://127.0.0.1:5001/caption', formData, {
-            headers: {
-                'Content-Type': `multipart/form-data`
+        // Send the POST request with the prompt in the request body
+        const response = await axios.post('http://127.0.0.1:3002/generate', 
+            { prompt: prompt }, 
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                responseType: 'arraybuffer' // Make sure the response is an image
             }
-        });
+        );
 
-        const caption = response.data.caption;
-        fs.unlinkSync(imagePath); // Clean up the uploaded file
-        res.render('result', { caption });
+        console.log(response.data); // Check the image buffer
+
+        // Save the image
+        const imageBuffer = response.data; // Image data as buffer
+        const imageFileName = 'generated_image.png';
+        const outputPath = path.join(__dirname, '..', 'public', imageFileName);
+
+        // Save the image to disk
+        fs.writeFileSync(outputPath, imageBuffer);
+
+        // Send back the URL of the saved image
+        res.render('result3', { imageUrl: `${imageFileName}` });
+
+
+        // const imageUrl = response.data.image_url;
+        // res.render('result', { imageUrl });
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error generating caption');
+        res.status(500).send('Error generating image');
     }
 };
 

@@ -108,17 +108,26 @@
 </head>
 <body>
   <nav>
-    <img src="images/logo.png" alt="CMU SCS Logo">
-    <div class="title">Intro to Deep Learning 11-785 Group Project</div>
+    <img src="../public/images/logo.png"  alt="CMU SCS Logo">
+    <div class="title">Intro to Deep Learning 11-785</div>
+    <div class="group">Group 35</div>
   </nav>
 
   <div class="container">
-    <h1>Generated Caption</h1>
-    <p><%= caption %></p>
-    <form action="/text2text" method="POST" enctype="">
-      <input type="text" name="caption" id="caption" value="<%= caption %>" style="display: none;">
-      <button type="submit" id="submitButton">Generate Detailed Description</button>
-  </form>
+    <h1>Generated Image</h1>
+    <div class="images-container">
+      <div class="image-box">
+        <p><strong>Sketch Image</strong></p>
+        <img src="../public/uploads/uploaded_image.png" alt="Sketch Image">
+      </div>
+      <div class="image-box">
+        <p><strong>Output Image</strong></p>
+        <img src="../public/generated_image.png" alt="Output Image">
+      </div>
+    </div>
+   <a href="amazon.html"> <button>
+      Upload to Marketplace
+    </button></a>
   </div>
 </body>
 </html>

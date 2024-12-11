@@ -13,8 +13,17 @@ app.use(express.json());
 const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 
-const sketchRouter = require('./routes/sketch');
-app.use('/', sketchRouter);
+const image2textRouter = require('./routes/image2text');
+app.use('/', image2textRouter);
+
+const text2imageRouter = require('./routes/text2image');
+app.use('/', text2imageRouter);
+
+const text2textRouter = require('./routes/text2text');
+app.use('/', text2textRouter);
+
+const amazos = require('./routes/amazos');
+app.use('/', amazos);
 
 // 404 Page
 app.use((req, res) => {

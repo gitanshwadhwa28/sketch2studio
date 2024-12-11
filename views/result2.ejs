@@ -113,11 +113,11 @@
   </nav>
 
   <div class="container">
-    <h1>Generated Caption</h1>
-    <p><%= caption %></p>
-    <form action="/text2text" method="POST" enctype="">
-      <input type="text" name="caption" id="caption" value="<%= caption %>" style="display: none;">
-      <button type="submit" id="submitButton">Generate Detailed Description</button>
+    <h1>Enhanced Description</h1>
+    <p><%= description %></p>
+    <form action="/text2image" method="POST" enctype="">
+      <input type="hidden" name="prompt" value="<%= description %>">
+      <button type="submit" id="submitButton">Generate Image</button>
   </form>
   </div>
 </body>
